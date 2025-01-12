@@ -1,0 +1,499 @@
+/*
+ChangeLog Comments;
+12/10/24
+Code clean up *INCOMPLETE* - Anthony
+Commented out methods for servos - wires not plugged in
+*/
+package org.firstinspires.ftc.teamcode;
+
+
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+
+
+@TeleOp(name = "ManualDrive", group = "linearOp")
+public class ManualDrive extends LinearOpMode {
+
+
+
+    //timer
+    private static final ElapsedTime time = new ElapsedTime();
+
+
+
+    //Wheels
+    private DcMotor frontRightW;
+    private DcMotor frontLeftW;
+    private DcMotor backRightW;
+    private DcMotor backLeftW;
+
+
+
+//    //Servos
+//    double clawMinPos = 0;
+//    // intake rotating backwards and forwards
+//    Servo clawRotate;
+//    Servo claw;
+//    static final double INCREMENT = 0.1;     // amount to slew servo each CYCLE_MS cycle
+//    static final double MAX_POS2 = 0.8;     // Maximum rotational position
+//    static final double MAX_POS = 1.0;     // Maximum rotational position
+//    static final double MIN_POS = 0.2;     // Minimum rotational position
+//    double position = MAX_POS; // Start at halfway position
+//    double position2 = clawMinPos; // Start at halfway position
+
+
+
+
+
+
+
+
+    //motors for turn & viper slide
+    private DcMotor viperSlide;
+    private DcMotor rotate1;
+    private DcMotor rotate2;// period of each cycle
+    int viperMax = 3100;
+    int min =0;
+    int rotateMax = 150;
+    int viperPosition = min;
+    int rotatePosition=min;
+    int viperIncrement = 20;
+    int rotateIncrement = 3;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public void initialize() {
+//        //init for servo clawRotate
+//        clawRotate = hardwareMap.get(Servo.class,"clawRotate");
+//        clawRotate.setDirection(Servo.Direction.FORWARD);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //clawMinPos = 0.5;
+        // initializing wheel motors
+        frontRightW = hardwareMap.get(DcMotor.class, "FrontRightWheel");
+        frontLeftW = hardwareMap.get(DcMotor.class, "FrontLeftWheel");
+        backRightW = hardwareMap.get(DcMotor.class, "BackRightWheel");
+        backLeftW = hardwareMap.get(DcMotor.class, "BackLeftWheel");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//        //initialising servos (for claw)
+//        claw = hardwareMap.get(Servo.class, "claw");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // initialising viper slide
+        viperSlide = hardwareMap.get(DcMotor.class, "viperSlide");
+        viperSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        viperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        viperSlide.setDirection(DcMotorSimple.Direction.FORWARD);
+//        viperSlide2 = hardwareMap.get(DcMotor.class, "viperSlide2");
+//        viperSlide2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        viperSlide2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        viperSlide2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+
+
+
+
+        //changing directions of viper slide
+        rotate1 = hardwareMap.get(DcMotor.class, "rotate1");
+        rotate2 = hardwareMap.get(DcMotor.class, "rotate2");
+        rotate1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotate2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotate1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotate2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotate1.setDirection(DcMotorSimple.Direction.FORWARD);
+        rotate2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+
+
+
+
+
+
+        // setting direction for wheel motors(may change)
+        frontLeftW.setDirection(DcMotor.Direction.REVERSE);
+        frontRightW.setDirection(DcMotor.Direction.FORWARD);
+        backRightW.setDirection(DcMotor.Direction.FORWARD);
+        backLeftW.setDirection(DcMotor.Direction.REVERSE);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //brakes when no power is applied
+        frontRightW.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightW.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftW.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftW.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        viperSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rotate1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rotate2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //setting direction for servos
+//        claw.setDirection(Servo.Direction.FORWARD);
+    }//initialize
+
+
+
+
+
+
+
+
+    public void runOpMode() {
+        initialize();
+
+
+
+
+
+
+
+
+        //start button
+        telemetry.addData("Status", "Initialized");
+        telemetry.addData(">", "Press Start to scan Servo.");
+        telemetry.update();
+        waitForStart();//does not begin until start button is pressed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //run until driver presses stop
+        while (opModeIsActive()) {
+            //displays the elapsed time
+            telemetry.addData("Time", "%.2f", time.time());
+            //moves the robot
+            drive();
+            extend();
+            changeOrientation();
+//            intake();
+//            rotateIntake();
+            telemetry.update();
+        }
+    }//runOpMode
+
+
+
+
+
+
+
+
+    public void drive() {
+        double max;
+
+
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+        double lateral = gamepad1.left_stick_x;
+        double yaw = gamepad1.right_stick_x;
+
+
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+        double leftFrontPower = axial +lateral + yaw;
+        double rightFrontPower = axial - lateral - yaw;
+        double leftBackPower = axial - lateral + yaw;
+        double rightBackPower = axial + lateral - yaw;
+
+
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+        max = Math.max(max, Math.abs(leftBackPower));
+        max = Math.max(max, Math.abs(rightBackPower));
+
+
+        if (max > 1.0) {
+            leftFrontPower /= max;
+            rightFrontPower /= max;
+            leftBackPower /= max;
+            rightBackPower /= max;
+        }
+
+
+        // Send calculated power to wheels
+        frontLeftW.setPower(leftFrontPower);
+        frontRightW.setPower(rightFrontPower);
+        backLeftW.setPower(leftBackPower);
+        backRightW.setPower(rightBackPower);
+
+
+        // Show the elapsed game time and wheel power.
+        telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
+        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+
+
+    }//end driveControls()
+
+
+
+
+    public void extend() {
+
+
+        //viperSlide.setTargetPosition(viperSlide.getCurrentPosition());
+        //viperSlide2.setTargetPosition(viperSlide.getCurrentPosition());
+        //sets power and pos
+        if (gamepad2.b&&viperPosition<=viperMax) {
+//            if(rotatePosition>=rotateMax){
+//                //extends half if not fully erect
+//                viperPosition=viperMax/3;
+//                viperPow=0.5;
+//                //viperSlide2.setTargetPosition(max/3);
+//            }
+//            else{
+            viperPosition += viperIncrement;
+            //viperSlide2.setTargetPosition(max);
+            //extends full way
+//            }
+        }
+        else if (gamepad2.x&&viperPosition>=min) {
+            //extend down
+            viperPosition-=viperIncrement;
+            //viperSlide2.setTargetPosition(min);
+            //power=-0.25;
+        }
+
+
+
+
+        //runs to position, intended target
+        viperSlide.setTargetPosition(viperPosition);
+        viperSlide.setPower(0.5);
+        viperSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //viperSlide2.setPower(0.75);
+        // viperSlide2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+
+
+        // Display the current value
+        telemetry.addData("viper tick:", "%7d", viperSlide.getCurrentPosition());
+    }//end of extend
+
+
+
+
+
+
+
+
+//    public void intake() {
+//        // slew the servo, according to the rampUp (direction) variable.
+//        if (gamepad2.dpad_up) {
+//            // Keep stepping up until we hit the max value.
+//            position += INCREMENT;
+//            if (position >= MAX_POS2) {
+//                position = MAX_POS2;
+//            }
+//        }
+//        else if(gamepad2.dpad_down){
+//            // Keep stepping down until we hit the min value.
+//            position -= INCREMENT;
+//            if (position <= MIN_POS) {
+//                position = MIN_POS;
+//            }
+//        }
+//
+//
+//
+//
+//        // Set the servo to the new position and pause;
+//        claw.setPosition(position);
+//
+//        // Display the current value
+//        telemetry.addData("Servo Position", "%5.2f", position);
+//
+//
+//
+//
+//    }//end of intake
+
+
+
+
+
+
+
+
+//    public void rotateIntake() {
+//        // slew the servo, according to the rampUp (direction) variable.
+//        if (gamepad2.right_bumper) {
+//            // Keep stepping up until we hit the max value.
+//            position2 += INCREMENT;
+//            if (position2 >= MAX_POS) {
+//                position2 = MAX_POS;
+//            }
+//        }
+//        else if(gamepad2.left_bumper){
+//            // Keep stepping down until we hit the min value.
+//            position2 -= INCREMENT;
+//            if (position2 <= clawMinPos) {
+//                position2 = clawMinPos;
+//            }
+//        }
+//
+//
+//        // Set the servo to the new position and pause;
+//        clawRotate.setPosition(position2);
+//
+//
+//        // Display the current value
+//        telemetry.addData("Servo Position", "%5.2f", position2);
+//    }//end of rotateIntake
+//
+//
+
+
+
+
+    //brings the claw up/down
+    public void changeOrientation() {
+        //int pos1 = rotate1.getCurrentPosition();// encoder position, determines max height
+        //int pos2 = rotate2.getCurrentPosition();// encoder position, determines max height
+        //rotatePosition
+        //rotate1.setTargetPosition(rotate1.getCurrentPosition());
+        //rotate2.setTargetPosition(rotate2.getCurrentPosition());
+        // Ramp the motors, according to the rampUp variable.
+        if (gamepad2.y&&rotatePosition <= rotateMax) {
+            //rotate1.setTargetPosition(max2);
+            //rotate2.setTargetPosition(max2);
+            rotatePosition += rotateIncrement;
+            //pos2=max2;
+            //power = 0.25;
+        } else if (gamepad2.a&&rotatePosition >=min) {
+            rotatePosition -= rotateIncrement;
+            //rotate1.setTargetPosition(min);
+            //rotate2.setTargetPosition(min);
+            // power=-0.25;
+        }
+//        else{
+//            rotatePow=0;
+//        }
+
+
+
+        rotate1.setTargetPosition(rotatePosition);
+        rotate2.setTargetPosition(rotatePosition);
+        rotate1.setPower(1);
+        rotate2.setPower(1);
+        rotate1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotate2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+
+
+
+        // Display the current value
+        telemetry.addData("Encoder tick1", "%5d", rotate1.getCurrentPosition());
+        telemetry.addData("Encoder tick2", "%5d", rotate2.getCurrentPosition());
+        telemetry.addData("rotatePos", "%5d", rotatePosition);
+        telemetry.addData("Power1", "%5.2f", rotate1.getPower());
+        telemetry.addData("Power2", "%5.2f", rotate2.getPower());
+    }//changeOrientation
+}//end of manual
+
+
+
